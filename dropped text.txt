@@ -1,0 +1,2 @@
+/home/subodh/Desktop/Gibberish-Detector-master/gib_detect_train.py
+/home/subodh/Desktop/Gibberish-Detector-master/gib_model.pki
