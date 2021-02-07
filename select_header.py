@@ -6,6 +6,7 @@ import gib_detect_train
 from gensim.parsing.preprocessing import remove_stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 import difflib
+from pdf_downloader import connect
 doc= fitz.open("rr.pdf")
 
 model_data = pickle.load(open('gib_model.pki', 'rb'))
@@ -172,7 +173,7 @@ for i in range(len(list_topics)):
             if(boz==True):
                 degree.append(j)
 # pure_degree=degree.copy()
-
+connect("number theory",degree)
 # Just_pure_degree=[]
 # for i in range(len(degree)):
 #     my_str=degree[i]
