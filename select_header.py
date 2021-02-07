@@ -4,6 +4,8 @@ import re
 import pickle
 import gib_detect_train
 from gensim.parsing.preprocessing import remove_stopwords
+from gensim.parsing.preprocessing import STOPWORDS
+
 doc= fitz.open("to.pdf")
 
 model_data = pickle.load(open('gib_model.pki', 'rb'))
@@ -105,39 +107,43 @@ def headers_para(doc, size_tag):
                 block_string = ""  # text found in block
                 for l in b["lines"]:  # iterate through the text lines
                     for s in l["spans"]:
-                        if("h" in size_tag[s['size']] ):   
-                            if s['text'].strip():
-                                
-                                    if first:
-                                        previous_s = s
-                                        first = False
-                                        
-                                        block_string = size_tag[s['size']] + s['text']
-                                        
+                        if("h" in size_tag[s['size']]  ): 
+                            if("h5" in size_tag[s['size']]) :
+                                print("")
+                            else:
+                                if s['text'].strip():
                                     
-                                    else:
-                                        if s['size'] == previous_s['size']:
+                                        if first:
+                                            previous_s = s
+                                            first = False
                                             
-                                            if block_string and all((c == "|") for c in block_string):
-                                                # block_string only contains pipes
-                                                block_string = size_tag[s['size']] + s['text']
-                                                
-                                            if block_string == "":
-                                                # new block has started, so append size tag
-                                                block_string = size_tag[s['size']] + s['text']
-                                            else:  # in the same block, so concatenate strings
-                                                block_string += " " + s['text']
-
-                                        else:
-                                            header_para.append(block_string)
                                             block_string = size_tag[s['size']] + s['text']
                                             
-                                        previous_s = s
+                                        
+                                        else:
+                                            if s['size'] == previous_s['size']:
+                                                
+                                                if block_string and all((c == "|") for c in block_string):
+                                                    # block_string only contains pipes
+                                                    block_string = size_tag[s['size']] + s['text']
+                                                    
+                                                if block_string == "":
+                                                    # new block has started, so append size tag
+                                                    block_string = size_tag[s['size']] + s['text']
+                                                else:  # in the same block, so concatenate strings
+                                                    block_string += " " + s['text']
 
-                        # new block started, indicating with a pipe
-                        
+                                            else:
+                                                header_para.append(block_string)
+                                                block_string = size_tag[s['size']] + s['text']
+                                                
+                                            previous_s = s
 
-                            header_para.append(block_string)
+                            # new block started, indicating with a pipe
+                            
+
+                                header_para.append(block_string)
+                
     return header_para
     
 
@@ -158,12 +164,10 @@ for i in range(len(list_topics)):
             model_mat = model_data['mat']
             threshold = model_data['thresh']
             boz= gib_detect_train.avg_transition_prob(j, model_mat) > threshold
-            print(j,boz)
+            
             if(boz==True):
                 degree.append(j)
 tt=str(degree)
-yo=remove_stopwords(tt)
-print(yo)
 
- 
+print(degree)
             
