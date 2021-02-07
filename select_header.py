@@ -5,8 +5,8 @@ import pickle
 import gib_detect_train
 from gensim.parsing.preprocessing import remove_stopwords
 from gensim.parsing.preprocessing import STOPWORDS
-
-doc= fitz.open("to.pdf")
+import difflib
+doc= fitz.open("rr.pdf")
 
 model_data = pickle.load(open('gib_model.pki', 'rb'))
 
@@ -108,7 +108,7 @@ def headers_para(doc, size_tag):
                 for l in b["lines"]:  # iterate through the text lines
                     for s in l["spans"]:
                         if("h" in size_tag[s['size']]  ): 
-                            if("h5" in size_tag[s['size']]) :
+                            if("h5" in size_tag[s['size']] or "h6" in size_tag[s['size']]or "h7" in size_tag[s['size']]) :
                                 print("")
                             else:
                                 if s['text'].strip():
@@ -131,27 +131,31 @@ def headers_para(doc, size_tag):
                                                     # new block has started, so append size tag
                                                     block_string = size_tag[s['size']] + s['text']
                                                 else:  # in the same block, so concatenate strings
-                                                    block_string += " " + s['text']
-
+                                                   block_string +=" " + s['text']
+                                                
                                             else:
                                                 header_para.append(block_string)
-                                                block_string = size_tag[s['size']] + s['text']
                                                 
+                                                block_string = size_tag[s['size']] + s['text']
+                                               
+                                          
                                             previous_s = s
-
-                            # new block started, indicating with a pipe
+                                            
+                header_para.append(block_string)
+                            
                             
 
-                                header_para.append(block_string)
-                
+                            
+  
     return header_para
     
 
 list_topics=str(fonts(doc))
 
 list_topics=list_topics.split(",")
-print(list_topics)
+
 degree=[]
+pure_degree=[]
 for i in range(len(list_topics)):
     if("h" in list_topics[i]):
         res=re.sub("\d+",'',list_topics[i])
@@ -167,7 +171,21 @@ for i in range(len(list_topics)):
             
             if(boz==True):
                 degree.append(j)
-tt=str(degree)
+# pure_degree=degree.copy()
+
+# Just_pure_degree=[]
+# for i in range(len(degree)):
+#     my_str=degree[i]
+#     pure_degree.remove(my_str)
+   
+#     best_match = difflib.get_close_matches(my_str,pure_degree,1)
+#     # print(degree)
+  
+#     if(best_match != []):
+#         Just_pure_degree.append(best_match[0])
+
+#     # score = difflib.SequenceMatcher(None, my_str, best_match).ratio()
+
+# result = [e for e in degree if e not in Just_pure_degree]
 
 print(degree)
-            

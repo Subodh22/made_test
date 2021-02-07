@@ -1,6 +1,4 @@
-from gensim.models import Word2Vec
-
-gmodel=Word2Vec.load_word2vec_format(fname)
-ms=gmodel.most_similar('good',10)
-for x in ms:
-    print x[0],x[1]
+elements = [1, 2, 3, 4, 5, 6, 6, 7]
+exclude = [1, 3, 6]
+result = [e for e in elements if e not in exclude]
+print(result)
