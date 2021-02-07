@@ -6,7 +6,8 @@ import gib_detect_train
 from gensim.parsing.preprocessing import remove_stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 import difflib
-from pdf_downloader import connect
+
+from pdf_downloader import dog
 doc= fitz.open("rr.pdf")
 
 model_data = pickle.load(open('gib_model.pki', 'rb'))
@@ -171,9 +172,13 @@ for i in range(len(list_topics)):
             boz= gib_detect_train.avg_transition_prob(j, model_mat) > threshold
             
             if(boz==True):
+                j=" ".join(j.split())
                 degree.append(j)
 # pure_degree=degree.copy()
-connect("number theory",degree)
+d=dog("bolt://localhost:7687","neo4j","mathers22")
+
+print(degree)
+d.add_person("number theory",degree)
 # Just_pure_degree=[]
 # for i in range(len(degree)):
 #     my_str=degree[i]
@@ -189,4 +194,4 @@ connect("number theory",degree)
 
 # result = [e for e in degree if e not in Just_pure_degree]
 
-print(degree)
+
