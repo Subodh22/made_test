@@ -11,7 +11,16 @@ class dog:
         with self._driver.session() as session:
             session.write_transaction(self.create_obj, subject,data_list)
             session.write_transaction(self.match_connect, subject)
-            return session.write_transaction(self.topic_degree, subject,data_list)
+            session.write_transaction(self.topic_degree, subject,data_list)
+            # session.read_transaction(self.check)
+            print("running")
+    @staticmethod
+    def check(tx):
+        q1="MATCH()-[r:AHEAD_OF]->() return count(*)"
+        nodes=tx.run(q1)
+        print(nodes)
+        
+
     @staticmethod
     def create_obj(tx,subject,data_list):
         query="CREATE(:subject{name:$subjec})"
@@ -26,6 +35,7 @@ class dog:
     def match_connect(tx,subject):
         match_querye="MATCH(x:topic{subject:$subjec}),(y:subject{name:$subjec})CREATE (x)-[:TOPIC_OF]->(y)"
         tx.run(match_querye,subjec=subject)
+        
 
     @staticmethod
     def topic_degree(tx,subject,data_list):
@@ -44,12 +54,8 @@ class dog:
                degre_create +=" " +"("+j+")-[:AHEAD_OF]->("+z+")"+jerry
 
            degre_match +=" "+"("+j+":topic{name:"+jolly+",subject:$subjec})"+jerry
-            
-          
-           
-        print(degre_create)
-        degree_query=str(degre_match)+str(degre_create)
-       
+        degree_query=degre_match+degre_create 
+        print(degree_query)
         tx.run(degree_query,subjec=subject)
 
 

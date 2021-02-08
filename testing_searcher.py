@@ -1,2 +1,2 @@
-dat="dsfdfs,"
-print(dat[:-1])
+d=['Number Theory', 'Divisibility', 'Facts about Divisibility', 'When Divisibility Goes Bad', 'Famous Conjectures in Number Theory', 'Die Hard', 'The Greatest Common Divisor', 'Linear Combinations and the GCD', 'Properties of the Greatest Common Divisor', 'Euclids Algorithm', 'One Solution for All Water Jug Problems', 'The Pulverizer', 'The Fundamental Theorem of Arithmetic', 'The Prime Number Theorem', 'first digit prime found in consecutive digits of e', 'com', 'Alan Turing', 'Turings Code Version', 'Breaking Turings Code', 'Modular Arithmetic', 'Turings Code Version', 'Arithmetic with a Prime Modulus', 'Multiplicative Inverses', 'Cancellation', 'Fermats Little Theorem', 'Breaking Turings CodeAgain', 'Turing Postscript', 'Arithmetic with an Arbitrary Modulus', 'The Riemann Hypothesis', 'Relative Primality', 'Eulers Theorem', 'The RSA Algorithm', 'J J Mathematics for Computer Science']
+print(len(d))

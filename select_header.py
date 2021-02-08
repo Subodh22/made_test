@@ -174,24 +174,11 @@ for i in range(len(list_topics)):
             if(boz==True):
                 j=" ".join(j.split())
                 degree.append(j)
-# pure_degree=degree.copy()
-d=dog("bolt://localhost:7687","neo4j","mathers22")
 
+d=dog("bolt://localhost:7687","neo4j","mathers22")
+degree=list(dict.fromkeys(degree))
 print(degree)
 d.add_person("number theory",degree)
-# Just_pure_degree=[]
-# for i in range(len(degree)):
-#     my_str=degree[i]
-#     pure_degree.remove(my_str)
-   
-#     best_match = difflib.get_close_matches(my_str,pure_degree,1)
-#     # print(degree)
-  
-#     if(best_match != []):
-#         Just_pure_degree.append(best_match[0])
 
-#     # score = difflib.SequenceMatcher(None, my_str, best_match).ratio()
-
-# result = [e for e in degree if e not in Just_pure_degree]
 
 
