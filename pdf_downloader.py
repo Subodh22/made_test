@@ -1,5 +1,8 @@
 from neo4j import GraphDatabase
 import py2neo
+import urllib.request
+import re 
+
 
 
 class dog:
@@ -26,9 +29,15 @@ class dog:
         query="CREATE(:subject{name:$subjec})"
         
         for i in range(len(data_list)):
+            print(i)
+            jj=data_list[i].replace(" ","+")
+            
+            html = urllib.request.urlopen("https://www.youtube.com/results?search_query="+jj)
+            video_ids = re.findall(r'watch\?v=(\S{11})',html.read().decode())
+            video_ids="'"+",".join(video_ids)+"'"
             genny="'"+str(data_list[i])+"'"
             gon="'"+str(i)+"'"
-            query +=","+"(:topic{name:"+genny+",subject:$match_query,degree:"+gon+"})"
+            query +=","+"(:topic{name:"+genny+",subject:$match_query,degree:"+gon+",video_ids:"+video_ids+"})"
         print(query)
         tx.run(query,subjec=subject,match_query=subject)
     @staticmethod
