@@ -6,6 +6,7 @@ import gib_detect_train
 from gensim.parsing.preprocessing import remove_stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 import difflib
+from you_serious import video_connect
 
 from pdf_downloader import dog
 doc= fitz.open("rr.pdf")
@@ -177,8 +178,14 @@ for i in range(len(list_topics)):
 
 d=dog("bolt://localhost:7687","neo4j","mathers22")
 degree=list(dict.fromkeys(degree))
-print(degree)
-d.add_person("number theory",degree)
+
+
+# print(degree)
+# d.add_person("number theory",degree)
+pol=[]
+pol.append(degree[4])
+
+video_connect("number Theory",degree,"bolt://localhost:7687","neo4j","mathers22")
 
 
 

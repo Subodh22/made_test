@@ -1,9 +1,9 @@
 from neo4j import GraphDatabase
+subject="'"+"com"+"'"
+data="'"+"data"+"'"
 
-BATCH = {'batch': []}
-# query = "UNWIND $batch AS row MERGE (y:User{name:row['name']}) MERGE (y)-[:AHEAD_OF]->(e:User{id:row['ahead_of']}) "
-BATCH["batch"] =  [{"id": "x1", "name": "Toto","subject":"math","ahead_of":"x2"},{"id":"x2","name":"tome","subject":"math","ahead_of":""}]
-query="UNWIND $batch as row CREATE (x:user{id:row['id'],name:row['name],'ahead_of':"str(row['ahead_of'])"})"
+mer_list=[{'degree': 0, 'topic': "'Famous Conjectures in Number Theory'", 'id': 'YcYmbcwmRwQ', 'img': 'https://i.ytimg.com/vi/YcYmbcwmRwQ/default.jpg', 'title': 'Number Theory: Queen of Mathematics', 'des': 'In which years does February have five Sundays? How many right-angled triangles with whole-number sides have a side of length 29? How many shuffles are ...', 'duration': 'PT1H2M35S', 'view_count': '23745'}, {'degree': 1, 'topic': "'Famous Conjectures in Number Theory'", 'id': '-Qtl4nn7R4A', 'img': 'https://i.ytimg.com/vi/-Qtl4nn7R4A/default.jpg', 'title': 'Introduction to Number Theory', 'des': 'Here we give a brief introduction to the branch of math known as number theory. This is a Bullis Student Tutors video -- made by students for students. YouTube ...', 'duration': 'PT4M44S', 'view_count': '86975'}, {'degree': 0, 'topic': "'Cancellation'", 'id': 'ewQUduWoXoY', 'img': 'https://i.ytimg.com/vi/ewQUduWoXoY/default.jpg', 'title': 'Cancelation law in congurence /number theory /Bs maths semester iv', 'des': 'College maths.', 'duration': 'PT11M51S', 'view_count': '218'}, {'degree': 1, 'topic': "'Cancellation'", 'id': 'Fh4eaa1t264', 'img': 'https://i.ytimg.com/vi/Fh4eaa1t264/default.jpg', 'title': 'Cancellation law #Number theory', 'des': 'Cancellation law#Number theory#bsc5sem#mathematics.', 'duration': 'PT3M7S', 'view_count': '43'}, {'degree': 0, 'topic': "'The RSA Algorithm'", 'id': '4zahvcJ9glg', 'img': 'https://i.ytimg.com/vi/4zahvcJ9glg/default.jpg', 'title': 'The RSA Encryption Algorithm (1 of 2: Computing an Example)', 'des': 'null', 'duration': 'PT8M40S', 'view_count': '552644'}, {'degree': 1, 'topic': "'The RSA Algorithm'", 'id': 't5lACDDoQTk', 'img': 'https://i.ytimg.com/vi/t5lACDDoQTk/default.jpg', 'title': 'RSA code made easy', 'des': "The solution to a typical exam question. For more on step 4 see Euclid's algorithm made easy. See my other videos ...", 'duration': 'PT7M45S', 'view_count': '83927'}]
 graphe=GraphDatabase.driver("bolt://localhost:7687",auth=("neo4j","mathers22"))
-session=graphe.session()
-session.run(query,batch=BATCH["batch"])
+sess=graphe.session()
+query="UNWIND $mer_list as row MATCH(m:topic{name:"+subject+"}) CREATE(n:video{name:row.degree,topic:row.topic,id:row.id,img:row.img,title:row.title,des:row.des,duration:row.duration,views:row.view_count})-[:VIDEO_OF]->(m)"
+sess.run(query,mer_list=mer_list)

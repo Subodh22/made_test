@@ -3,6 +3,10 @@ import py2neo
 import urllib.request
 import re 
 
+from googleapiclient.discovery import build
+api_key = "AIzaSyCaa-dKG3l0I4Uu-LyCH_qP611lRUl2THY"
+ 
+service = build('youtube','v3',developerKey=api_key)
 
 
 class dog:
@@ -15,6 +19,7 @@ class dog:
             session.write_transaction(self.create_obj, subject,data_list)
             session.write_transaction(self.match_connect, subject)
             session.write_transaction(self.topic_degree, subject,data_list)
+            
             # session.read_transaction(self.check)
             print("running")
     @staticmethod
@@ -30,14 +35,9 @@ class dog:
         
         for i in range(len(data_list)):
             print(i)
-            jj=data_list[i].replace(" ","+")
-            
-            html = urllib.request.urlopen("https://www.youtube.com/results?search_query="+jj)
-            video_ids = re.findall(r'watch\?v=(\S{11})',html.read().decode())
-            video_ids="'"+",".join(video_ids)+"'"
             genny="'"+str(data_list[i])+"'"
             gon="'"+str(i)+"'"
-            query +=","+"(:topic{name:"+genny+",subject:$match_query,degree:"+gon+",video_ids:"+video_ids+"})"
+            query +=","+"(:topic{name:"+genny+",subject:$match_query,degree:"+gon+"})"
         print(query)
         tx.run(query,subjec=subject,match_query=subject)
     @staticmethod
@@ -66,6 +66,18 @@ class dog:
         degree_query=degre_match+degre_create 
         print(degree_query)
         tx.run(degree_query,subjec=subject)
+
+    # @staticmethod
+    # def video_connect(tx,subject,data_list):
+    #     for i in range(data_list):
+    #         filter_data="'"+data_list[i]+"'"
+    #         mer_list=you_connect(subject,data_list[i])
+
+    #         query="UNWIND {{mer_list}} as row MATCH(m:topic{name:"+filter_data+"}) MERGE(n;video{{name:row.degree,topic:row.topic,id:row.id,img:row.img,title:row.title,des:row.des,duration:row.duration,views:row.view_count}})-[:VIDEO_OF]->(m)"
+    #         tx.run(query,mer_list=mer_list)
+            
+
+
 
 
 
