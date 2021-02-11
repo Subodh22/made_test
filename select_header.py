@@ -7,9 +7,12 @@ from gensim.parsing.preprocessing import remove_stopwords
 from gensim.parsing.preprocessing import STOPWORDS
 import difflib
 from you_serious import video_connect
-
+from youtube_api import jeb
 from pdf_downloader import dog
-doc= fitz.open("rr.pdf")
+
+import multiprocessing
+import concurrent.futures
+doc= fitz.open("proposition.pdf")
 
 model_data = pickle.load(open('gib_model.pki', 'rb'))
 
@@ -176,16 +179,23 @@ for i in range(len(list_topics)):
                 j=" ".join(j.split())
                 degree.append(j)
 
-d=dog("bolt://localhost:7687","neo4j","mathers22")
+d=dog("bolt://18.225.9.176/:7687","neo4j","mathers22")
 degree=list(dict.fromkeys(degree))
 
+subject_e="proposition"
+d.add_person(subject_e,degree)
 
-# print(degree)
-# d.add_person("number theory",degree)
-pol=[]
-pol.append(degree[4])
+print("ssolder")
+for i in range(len(degree)):
+    gon=subject_e+","+degree[i]
+    print(gon)
+    jeb(gon)
+# items=((subject_e,a )for a in degree)
+# with concurrent.futures.ProcessPoolExecutor() as executor:
+#         future=executor.map(jeb,items)
 
-video_connect("number Theory",degree,"bolt://localhost:7687","neo4j","mathers22")
+
+# video_connect("number Theory",degree,"bolt://localhost:7687","neo4j","mathers22")
 
 
 

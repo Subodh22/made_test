@@ -2,7 +2,7 @@ from neo4j import GraphDatabase
 import py2neo
 import urllib.request
 import re 
-
+from youtube_api import jeb
 from googleapiclient.discovery import build
 api_key = "AIzaSyCaa-dKG3l0I4Uu-LyCH_qP611lRUl2THY"
  
@@ -19,7 +19,7 @@ class dog:
             session.write_transaction(self.create_obj, subject,data_list)
             session.write_transaction(self.match_connect, subject)
             session.write_transaction(self.topic_degree, subject,data_list)
-            
+            # session.write_transaction(self.video_connect, subject,data_list)
             # session.read_transaction(self.check)
             print("running")
     @staticmethod
@@ -67,16 +67,12 @@ class dog:
         print(degree_query)
         tx.run(degree_query,subjec=subject)
 
-    # @staticmethod
-    # def video_connect(tx,subject,data_list):
-    #     for i in range(data_list):
-    #         filter_data="'"+data_list[i]+"'"
-    #         mer_list=you_connect(subject,data_list[i])
-
-    #         query="UNWIND {{mer_list}} as row MATCH(m:topic{name:"+filter_data+"}) MERGE(n;video{{name:row.degree,topic:row.topic,id:row.id,img:row.img,title:row.title,des:row.des,duration:row.duration,views:row.view_count}})-[:VIDEO_OF]->(m)"
-    #         tx.run(query,mer_list=mer_list)
+    
             
 
+    # def jun(items):
+        # query="UNWIND $mer_list as row MATCH(m:topic{name:"+filter_data+"}) CREATE(n:video{name:row.degree,topic:row.topic,id:row.id,img:row.img,title:row.title,des:row.des,duration:row.duration,views:row.view_count})-[:VIDEO_OF]->(m)"
+        #     tx.run(query,mer_list=mer_list)
 
 
 

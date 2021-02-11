@@ -12,13 +12,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import re
+from neo4j import GraphDatabase
 
 
 
 def jeb(jolt):
     options = webdriver.ChromeOptions()
     options.headless = True
-
+    youtube_data=[]
     options.add_argument("--window-size=1920,1080")
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--allow-running-insecure-content')
@@ -32,8 +34,8 @@ def jeb(jolt):
     driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
     
     jole=jolt.split(",")
-    subject=jole[0]
-    topic=jole[1]
+    subject=jole[0].replace(" ","+")
+    topic=jole[1].replace(" ","+")
     
     
     url="https://www.youtube.com/results?search_query="+topic+"in="+subject
@@ -42,29 +44,32 @@ def jeb(jolt):
         element =WebDriverWait(driver,10).until(
         EC.presence_of_all_elements_located((By.ID,"dismissable"))
         )
-       
+        driver.execute_script("window.scrollTo(0, 800)") 
         
-        # element.click()
-        # elemente =WebDriverWait(driver,10).until(
-        # EC.presence_of_all_elements_located((By.TAG_NAME,"b"))
-        # )
-        youtube_data=[]
-        for i in range(len(element)):
-            apii=element[i].find_element_by_id("thumbnail").get_attribute("href"),element[i].find_element_by_id("img").get_attribute("src"),element[i].find_element_by_tag_name("yt-formatted-string").get_attribute("aria-label")
-            youtube_data.append(apii)
-        print(youtube_data)
-        # print(element[0].find_element_by_id("img").get_attribute("src"))
-        # print(element[0].find_element_by_tag_name("yt-formatted-string").get_attribute("aria-label"))
-        # # ans=element.get_attribute('innerText').split()
-       
-        # if(ans[0]=="2" or ans[0]=="1"):
-        #     jolt[1][topic]=ans[0]
+        driver.execute_script("window.scrollTo(0, 1980)") 
+        for i in range(20):
+            vid_det={}
+            vid_det["degree"]=i
+            vid_det["video_id"]=re.findall(r"watch\?v=(\S{11})",(element[i].find_element_by_id("thumbnail").get_attribute("href")))
+            vid_det["title"]=element[i].find_element_by_tag_name("yt-formatted-string").get_attribute("aria-label")
+            vid_det["img"]=element[i].find_element_by_id("img").get_attribute("src")
+            vid_det["topic"]=jole[1]
+            youtube_data.append(vid_det)
         
-        
-        
+    except:
+        print("not_work")
     finally:
         driver.quit()
+    mer_list=youtube_data
+    topic="'"+jole[1]+"'"
+    graphe=GraphDatabase.driver("bolt://18.225.9.176/:7687",auth=("neo4j","mathers22"))
+    sess=graphe.session()
+    print("working")
+    print(topic)
+    query="UNWIND $mer_list as row MATCH(m:topic{name:"+topic+"}) CREATE(n:video{name:row.degree,topic:row.topic,id:row.video_id,img:row.img,title:row.title})-[:VIDEO_OF]->(m)"
+    sess.run(query,mer_list=mer_list)
+    print("worked")
 def main():
-    jeb("number+theory,rsa")
+    print("dope")
 if __name__ == '__main__':
     main()
