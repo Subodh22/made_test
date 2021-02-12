@@ -31,6 +31,7 @@ class dog:
 
     @staticmethod
     def create_obj(tx,subject,data_list):
+        subject
         query="CREATE(:subject{name:$subjec})"
         
         for i in range(len(data_list)):

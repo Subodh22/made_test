@@ -17,7 +17,7 @@ from neo4j import GraphDatabase
 
 
 
-def jeb(jolt):
+def jeb(jole):
     options = webdriver.ChromeOptions()
     options.headless = True
     youtube_data=[]
@@ -33,7 +33,7 @@ def jeb(jolt):
     options.add_argument('--no-sandbox')
     driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
     
-    jole=jolt.split(",")
+   
     subject=jole[0].replace(" ","+")
     topic=jole[1].replace(" ","+")
     
@@ -62,7 +62,7 @@ def jeb(jolt):
         driver.quit()
     mer_list=youtube_data
     topic="'"+jole[1]+"'"
-    graphe=GraphDatabase.driver("bolt://18.225.9.176/:7687",auth=("neo4j","mathers22"))
+    graphe=GraphDatabase.driver("bolt://18.221.34.104/:7687",auth=("neo4j","mathers22"))
     sess=graphe.session()
     print("working")
     print(topic)
