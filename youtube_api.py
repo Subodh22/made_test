@@ -47,11 +47,35 @@ def jeb(jole):
         driver.execute_script("window.scrollTo(0, 800)") 
         
         driver.execute_script("window.scrollTo(0, 1980)") 
-        for i in range(20):
+        for i in range(15):
             vid_det={}
             vid_det["degree"]=i
             vid_det["video_id"]=re.findall(r"watch\?v=(\S{11})",(element[i].find_element_by_id("thumbnail").get_attribute("href")))
-            vid_det["title"]=element[i].find_element_by_tag_name("yt-formatted-string").get_attribute("aria-label")
+
+
+            toni = element[i].find_element_by_tag_name("yt-formatted-string").get_attribute("aria-label")
+            print(toni)
+            print("sd")
+            result = re.search('ago(.*)views', toni)
+            
+            
+            ioi=" ".join((result.group(1)).split(" ")[:-2])
+            print(ioi)
+
+
+            
+            tolir=element[i].find_element_by_id("metadata-line")
+          
+            
+    
+            toli=tolir.find_elements_by_tag_name("span")
+            
+           
+            vid_det["duration"]=ioi
+            vid_det["views"]=toli[0].get_attribute("innerHTML")
+            vid_det["age"]=toli[1].get_attribute("innerHTML")
+           
+            vid_det["title"]=element[i].find_element_by_tag_name("yt-formatted-string").get_attribute("innerHTML")
             vid_det["img"]=element[i].find_element_by_id("img").get_attribute("src")
             vid_det["topic"]=jole[1]
             youtube_data.append(vid_det)
@@ -62,13 +86,13 @@ def jeb(jole):
         driver.quit()
     mer_list=youtube_data
     topic="'"+jole[1]+"'"
-    graphe=GraphDatabase.driver("bolt://18.221.34.104/:7687",auth=("neo4j","mathers22"))
+    graphe=GraphDatabase.driver("bolt://localhost/:7687",auth=("neo4j","mathers22"))
     sess=graphe.session()
-    print("working")
-    print(topic)
-    query="UNWIND $mer_list as row MATCH(m:topic{name:"+topic+"}) CREATE(n:video{name:row.degree,topic:row.topic,id:row.video_id,img:row.img,title:row.title})-[:VIDEO_OF]->(m)"
+   
+    
+    query="UNWIND $mer_list as row MATCH(m:topic{name:"+topic+"}) CREATE(n:video{name:row.degree,topic:row.topic,id:row.video_id,img:row.img,title:row.title,age:row.age,views:row.views,duration:row.duration})-[:VIDEO_OF]->(m)"
     sess.run(query,mer_list=mer_list)
-    print("worked")
+   
 def main():
     print("dope")
 if __name__ == '__main__':

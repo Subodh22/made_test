@@ -12,7 +12,7 @@ from pdf_downloader import dog
 import wikipedia
 import multiprocessing
 import concurrent.futures
-doc= fitz.open("asym.pdf")
+doc= fitz.open("./pdfs/well.pdf")
 
 model_data = pickle.load(open('gib_model.pki', 'rb'))
 
@@ -179,12 +179,12 @@ for i in range(len(list_topics)):
                 j=" ".join(j.split())
                 degree.append(j)
 
-d=dog("bolt://18.221.34.104:7687","neo4j","mathers22")
+d=dog("bolt://localhost:7687","neo4j","mathers22")
 degree=list(dict.fromkeys(degree))
-
-subject_er='asymptotic notation'
+print(degree)
+subject_er='Well Ordering Principle'
 subject_e=wikipedia.search(subject_er)[0]
-
+print(subject_e)
 # d.add_person(subject_e,degree)
 
 while("" in degree) : 
@@ -192,8 +192,10 @@ while("" in degree) :
 
 lister=[]
 for i in range(len(degree)):
-    j=wikipedia.search(degree[i])[0]
+    
+   
     try:
+        j=wikipedia.search(degree[i])[0]
         res=j.replace("'"," ")
         
         lister.append(res)
@@ -205,8 +207,7 @@ for i in range(len(degree)):
 lister=list(dict.fromkeys(lister))
 manager= multiprocessing.Manager()
 return_dict= manager.dict()
-print("dole")
-print(lister)
+
 items=((subject_e,a,return_dict, lister.index(a))for a in lister)
 with concurrent.futures.ProcessPoolExecutor() as executor:
         future=executor.map(jeber,items)
@@ -218,7 +219,7 @@ new_topic.sort()
 topic_sorted=[]
 for i in range(len(new_topic)):
     topic_sorted.append(return_dict[new_topic[i]])
-print(topic_sorted)
+
 d.add_person(subject_e,topic_sorted)
 # jeb(subject_e,new_topic,"bolt://localhost:7687","neo4j","mathers22")
 toper_videos=((subject_e,a)for a in topic_sorted)

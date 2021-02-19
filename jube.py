@@ -1,3 +1,5 @@
-poli=[1,2,3,4]
+import json
 
-print(poli.index(3))
+with open('./major_json/Electrical Engineering and Computer Science (Course 6).json','r') as college_data:
+    majors = json.load(college_data)
+print(len(majors))
