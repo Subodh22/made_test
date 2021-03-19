@@ -12,7 +12,7 @@ from pdf_downloader import dog
 import wikipedia
 import multiprocessing
 import concurrent.futures
-doc= fitz.open("./pdfs/well.pdf")
+doc= fitz.open("./pdfs/ele.pdf")
 
 model_data = pickle.load(open('gib_model.pki', 'rb'))
 
@@ -182,7 +182,7 @@ for i in range(len(list_topics)):
 d=dog("bolt://localhost:7687","neo4j","mathers22")
 degree=list(dict.fromkeys(degree))
 print(degree)
-subject_er='Well Ordering Principle'
+subject_er='Electromagnetics'
 subject_e=wikipedia.search(subject_er)[0]
 print(subject_e)
 # d.add_person(subject_e,degree)
