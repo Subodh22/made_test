@@ -16,6 +16,12 @@ def mr_service(gene):
       majors = json.load(college_data)
       print("recorded")
 
+def openJson(name_tag):
+    pathe='./amc/'+name_tag+'.json'
+    with open(pathe,'r') as college_data:
+      majors = json.load(college_data)
+      return majors
+
 def writeToJson(fileName,data):
    
     filePath='./amc/'+fileName+'.json'
@@ -26,6 +32,7 @@ aftermath_calender=[]
 def search_jobs(search_subject):
     data={}
     topic_list=[]
+    youtube_data=[]
     options = webdriver.ChromeOptions()
     options.headless = True
    
@@ -87,6 +94,7 @@ def search_jobs(search_subject):
                    
                     td_topic=td_object[num_id].get_attribute("innerText")
                     topic_list.append(td_topic)
+                    
                 except:
                     continue
                 
@@ -134,9 +142,11 @@ def search_jobs(search_subject):
                     
                         td_topic=td_object[num_id].get_attribute("innerText")
                         topic_list.append(td_topic)
+                        
+                       
                     except:
                         continue
-                    
+                                            
 
 
 
@@ -145,6 +155,7 @@ def search_jobs(search_subject):
 
 
         data["topics"]=topic_list
+        data["vid_links"]=youtube_data
         subject_data_calendars.append(data)
     
     except:
@@ -153,6 +164,78 @@ def search_jobs(search_subject):
       
     finally:
        driver.quit()
+
+def Get_youtube(lister):
+    topic=lister[0]
+    subject=lister[1]
+    youtube_data=[]
+    options = webdriver.ChromeOptions()
+    options.headless = True
+   
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--allow-running-insecure-content')
+    options.add_argument("--disable-extensions")
+    options.add_argument("--proxy-server='direct://'")
+    options.add_argument("--proxy-bypass-list=*")
+    options.add_argument("--start-maximized")
+    options.add_argument('--disable-gpu')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--no-sandbox')
+    driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
+    urle="https://www.youtube.com/results?search_query="+topic+"in="+subject
+    driver.get(urle)
+    youtube_data=lister[2]
+    
+    try:
+        elemente =WebDriverWait(driver,10).until(
+        EC.presence_of_all_elements_located((By.ID,"dismissible"))
+        ) 
+      
+        driver.execute_script("window.scrollTo(0, 800)") 
+        
+        driver.execute_script("window.scrollTo(0, 1980)") 
+       
+        for i in range(15):
+            print(topic)
+            vid_det={}
+            vid_det["degree"]=i
+            vid_det["video_id"]=re.findall(r"watch\?v=(\S{11})",(elemente[i].find_element_by_id("thumbnail").get_attribute("href")))
+
+
+            toni = elemente[i].find_element_by_tag_name("yt-formatted-string").get_attribute("aria-label")
+           
+            result = re.search('ago(.*)views', toni)
+            
+            
+            ioi=" ".join((result.group(1)).split(" ")[:-2])
+            
+
+
+            
+            tolir=elemente[i].find_element_by_id("metadata-line")
+          
+            
+    
+            toli=tolir.find_elements_by_tag_name("span")
+            
+           
+            vid_det["duration"]=ioi
+            vid_det["views"]=toli[0].get_attribute("innerHTML")
+            vid_det["age"]=toli[1].get_attribute("innerHTML")
+          
+            vid_det["title"]=elemente[i].find_element_by_tag_name("yt-formatted-string").get_attribute("innerHTML")
+           
+            vid_det["img"]=elemente[i].find_element_by_id("img").get_attribute("src")
+            
+            vid_det["topic"]=topic
+           
+            youtube_data[topic]=vid_det
+            
+    except:
+        print("not_work")
+
+    
 
 def dentist(jon):
    
@@ -176,13 +259,14 @@ def dentist(jon):
           
             toni.append(jondoe)
             search_jobs(jondoe)
-            
             writeToJson(jondoe,subject_data_calendars)
             subject_data_calendats=[]
 
+            
+
 manager= multiprocessing.Manager()
 return_dict= manager.list()    
-
+your_data=manager.dict()
 
 
 def jobs(groupe):
@@ -203,10 +287,15 @@ def jobs(groupe):
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                   future=executor.map(dentist,items)
                 
-                   
+    for i in range(len(return_dict)):
+        data_json=openJson(return_dict[i])
+        work_data=data_json[0]
+        if(len(data_json)>1):
+            work_data=data_json[1]
+        items=((return_dict[i],s,your_data)for s in work_data["topics"])
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            future=executor.map(Get_youtube,items)
         
-    print(return_dict)
-    
     
 
 
@@ -219,6 +308,7 @@ def starter():
     # with concurrent.futures.ProcessPoolExecutor() as executor:
     #     future=executor.map(jobs,files)
     jobs('Business Analytics (Course 15-​2).json')
+    # Get_youtube()
 
 
 
