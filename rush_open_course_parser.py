@@ -126,7 +126,7 @@ def search_jobs(search_subject):
                         if("topic" in heads):
                             topic_int=i
                             print(topic_int)
-                            break
+                            continue
                     except:
                         continue
                 
@@ -166,8 +166,8 @@ def search_jobs(search_subject):
        driver.quit()
 
 def Get_youtube(lister):
-    topic=lister[0]
-    subject=lister[1]
+    topic=lister[1]
+    subject=lister[0]
     youtube_data=[]
     options = webdriver.ChromeOptions()
     options.headless = True
@@ -186,7 +186,9 @@ def Get_youtube(lister):
     urle="https://www.youtube.com/results?search_query="+topic+"in="+subject
     driver.get(urle)
     youtube_data=lister[2]
-    
+    rank=lister[3]
+    u_data=[]
+    print(rank)
     try:
         elemente =WebDriverWait(driver,10).until(
         EC.presence_of_all_elements_located((By.ID,"dismissible"))
@@ -197,9 +199,9 @@ def Get_youtube(lister):
         driver.execute_script("window.scrollTo(0, 1980)") 
        
         for i in range(15):
-            print(topic)
+            
             vid_det={}
-            vid_det["degree"]=i
+            vid_det["degree"]=lister[3]
             vid_det["video_id"]=re.findall(r"watch\?v=(\S{11})",(elemente[i].find_element_by_id("thumbnail").get_attribute("href")))
 
 
@@ -219,7 +221,7 @@ def Get_youtube(lister):
     
             toli=tolir.find_elements_by_tag_name("span")
             
-           
+            
             vid_det["duration"]=ioi
             vid_det["views"]=toli[0].get_attribute("innerHTML")
             vid_det["age"]=toli[1].get_attribute("innerHTML")
@@ -229,12 +231,17 @@ def Get_youtube(lister):
             vid_det["img"]=elemente[i].find_element_by_id("img").get_attribute("src")
             
             vid_det["topic"]=topic
+
+            u_data.append(vid_det)
+        
+    
+
            
-            youtube_data[topic]=vid_det
             
     except:
         print("not_work")
 
+    youtube_data[topic]=u_data
     
 
 def dentist(jon):
@@ -260,7 +267,7 @@ def dentist(jon):
             toni.append(jondoe)
             search_jobs(jondoe)
             writeToJson(jondoe,subject_data_calendars)
-            subject_data_calendats=[]
+            # subject_data_calendars=[]
 
             
 
@@ -272,7 +279,7 @@ your_data=manager.dict()
 def jobs(groupe):
    
     sub_path='./ad_sub/'+groupe
-    
+    work_data={}
     with open(sub_path,'r') as college_data:
         majors = json.load(college_data)
 
@@ -292,12 +299,28 @@ def jobs(groupe):
         work_data=data_json[0]
         if(len(data_json)>1):
             work_data=data_json[1]
-        items=((return_dict[i],s,your_data)for s in work_data["topics"])
+        items=((return_dict[i],s,your_data,work_data["topics"].index(s))for s in work_data["topics"])
         with concurrent.futures.ProcessPoolExecutor() as executor:
             future=executor.map(Get_youtube,items)
+       
+        
+        maj={}
+        pather='./amc/'+return_dict[i]+'.json'
+        with open(pather,'r') as collegee_data:
+            maj = json.load(collegee_data)
+        po=[]
+        po.append(your_data.copy())
+        print(po)
+        # maj[0]["vid"]=po
+        # print(maj)
+        # j_obj=open(pather,"w")
+        # json.dump(maj,j_obj)
+        # j_obj.close()
+        
+            
+  
         
     
-
 
 
 
