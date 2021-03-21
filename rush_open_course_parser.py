@@ -308,14 +308,15 @@ def jobs(groupe):
         pather='./amc/'+return_dict[i]+'.json'
         with open(pather,'r') as collegee_data:
             maj = json.load(collegee_data)
+        j=your_data.copy()
         po=[]
-        po.append(your_data.copy())
-        print(po)
-        # maj[0]["vid"]=po
+        po.append(j)
+        # print(po)
+        maj[0]["vid"]=po
         # print(maj)
-        # j_obj=open(pather,"w")
-        # json.dump(maj,j_obj)
-        # j_obj.close()
+        j_obj=open(pather,"w")
+        json.dump(maj,j_obj)
+        j_obj.close()
         
             
   
