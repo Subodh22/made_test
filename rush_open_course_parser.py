@@ -9,12 +9,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from tqdm import tqdm
 def mr_service(gene):
     pathe='./amc/'+gene+'.json'
     with open(pathe,'r') as college_data:
       majors = json.load(college_data)
-      print("recorded")
+    
 
 def openJson(name_tag):
     pathe='./amc/'+name_tag+'.json'
@@ -125,7 +125,7 @@ def search_jobs(search_subject):
                         heads=(t_head[i].get_attribute("innerText")).lower()
                         if("topic" in heads):
                             topic_int=i
-                            print(topic_int)
+                            
                             continue
                     except:
                         continue
@@ -188,7 +188,7 @@ def Get_youtube(lister):
     youtube_data=lister[2]
     rank=lister[3]
     u_data=[]
-    print(rank)
+   
     try:
         elemente =WebDriverWait(driver,10).until(
         EC.presence_of_all_elements_located((By.ID,"dismissible"))
@@ -233,6 +233,7 @@ def Get_youtube(lister):
             vid_det["topic"]=topic
 
             u_data.append(vid_det)
+            print("bruno")
         
     
 
@@ -273,13 +274,13 @@ def dentist(jon):
 
 manager= multiprocessing.Manager()
 return_dict= manager.list()    
-your_data=manager.dict()
+
 
 
 def jobs(groupe):
    
     sub_path='./ad_sub/'+groupe
-    work_data={}
+    
     with open(sub_path,'r') as college_data:
         majors = json.load(college_data)
 
@@ -294,44 +295,48 @@ def jobs(groupe):
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                   future=executor.map(dentist,items)
                 
-    for i in range(len(return_dict)):
-        data_json=openJson(return_dict[i])
-        work_data=data_json[0]
-        if(len(data_json)>1):
-            work_data=data_json[1]
-        items=((return_dict[i],s,your_data,work_data["topics"].index(s))for s in work_data["topics"])
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            future=executor.map(Get_youtube,items)
-       
-        
-        maj={}
-        pather='./amc/'+return_dict[i]+'.json'
-        with open(pather,'r') as collegee_data:
-            maj = json.load(collegee_data)
-        j=your_data.copy()
-        po=[]
-        po.append(j)
-        # print(po)
-        maj[0]["vid"]=po
-        # print(maj)
-        j_obj=open(pather,"w")
-        json.dump(maj,j_obj)
-        j_obj.close()
-        
+   
+           
             
+            print(return_dict[i]+" "+"donezo")
+           
+
   
         
     
+def june_bug():
+    work_data={}
+    for i in tqdm(range(len(return_dict))):
+        data_json=openJson(return_dict[i])
+        your_data=manager.dict()
+        if(data_json!=[]):
+            work_data=data_json[0]
+            if(len(data_json)>1):
+                work_data=data_json[1]
+            item=((return_dict[i],s,your_data,work_data["topics"].index(s))for s in work_data["topics"])
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                future=executor.map(Get_youtube,item)
 
-
+            maj={}
+            pather='./amc/'+return_dict[i]+'.json'
+            with open(pather,'r') as collegee_data:
+                maj = json.load(collegee_data)
+            j=your_data.copy()
+            po=[]
+            po.append(j)
+            maj[0]["vid"]=po
+            j_obj=open(pather,"w")
+            json.dump(maj,j_obj)
+            j_obj.close()
+            
 
 def starter():
     # path, dirs, files = next(os.walk("./ad_sub/"))
     # file_count = len(files)
     
-    # with concurrent.futures.ProcessPoolExecutor() as executor:
-    #     future=executor.map(jobs,files)
+   
     jobs('Business Analytics (Course 15-​2).json')
+    june_bug()
     # Get_youtube()
 
 
