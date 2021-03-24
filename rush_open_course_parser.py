@@ -290,15 +290,16 @@ def jobs(groupe):
             for x in range(len(jon[0])):
                 
                 value_for_extract=list(jon[0][x].values())
+                
                 # print(value_for_extract[0])
                 items=((l,return_dict)for l in value_for_extract[0])
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                   future=executor.map(dentist,items)
                 
+                
    
            
-            
-            print(return_dict[i]+" "+"donezo")
+         
            
 
   
@@ -336,7 +337,11 @@ def starter():
     
    
     jobs('Business Analytics (Course 15-​2).json')
-    june_bug()
+  
+    jole=list(return_dict)
+    
+    writeToJson('start_here',jole)
+    
     # Get_youtube()
 
 
