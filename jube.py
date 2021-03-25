@@ -11,38 +11,39 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from tqdm import tqdm
 import pandas as pd
-import multiprocessing as mp
-
+from multiprocessing import Pool
+from concurrent.futures import TimeoutError
+from multiprocessing import cpu_count
 
 
 
 def Get_youtube(lister):
-    df = pd.DataFrame(columns=["degree","video_id","duration","views","age","title","img","topic","subject"])
-    topic=lister[1]
-    subject=lister[0]
-    # youtube_data=[]
-    options = webdriver.ChromeOptions()
-    options.headless = True
-   
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--allow-running-insecure-content')
-    options.add_argument("--disable-extensions")
-    options.add_argument("--proxy-server='direct://'")
-    options.add_argument("--proxy-bypass-list=*")
-    options.add_argument("--start-maximized")
-    options.add_argument('--disable-gpu')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
-    urle="https://www.youtube.com/results?search_query="+topic+"in="+subject
-    driver.get(urle)
-    # youtube_data=lister[2]
-    rank=lister[3]
-    # u_data=[]
-   
     try:
-        
+        topic=lister[1]
+        subject=lister[0]
+        # youtube_data=[]
+        options = webdriver.ChromeOptions()
+        options.headless = True
+
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--allow-running-insecure-content')
+        options.add_argument("--disable-extensions")
+        options.add_argument("--proxy-server='direct://'")
+        options.add_argument("--proxy-bypass-list=*")
+        options.add_argument("--start-maximized")
+        options.add_argument('--disable-gpu')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
+        urle="https://www.youtube.com/results?search_query="+topic
+        driver.get(urle)
+        # youtube_data=lister[2]
+        rank=lister[3]
+        # u_data=[]
+   
+   
+       
         elemente =WebDriverWait(driver,10).until(
         EC.presence_of_all_elements_located((By.ID,"dismissible"))
         ) 
@@ -50,8 +51,10 @@ def Get_youtube(lister):
         driver.execute_script("window.scrollTo(0, 800)") 
         
         driver.execute_script("window.scrollTo(0, 1980)") 
+
        
-        for i in tqdm(range(10)):
+        
+        for i in tqdm(range(15)):
             
             vid_det={}
             vid_det["degree"]=lister[3]
@@ -88,40 +91,23 @@ def Get_youtube(lister):
             # u_data.append(vid_det)
             # vids=list(u_data.values())
             # print(vid_det)
-           
-            df=df.append(vid_det,ignore_index=True)
-        
+            df2 = pd.DataFrame(columns=["degree","video_id","duration","views","age","title","img","topic","subject"])
+    
             
+            df2=df2.append(vid_det,ignore_index=True)
+            df2.to_csv('./pending/'+subject+'.csv', mode='a', header=False)
+            print("okok")
        
-
-           
+        print(subject+"donezo")
+        driver.quit()   
             
+   
+   
+  
     except:
         print("not_work")
-
-    
     
   
-
-    # youtube_data[topic]=u_data
-    # maj={}
-    # maj[topic]=u_data
-    # print("bruno")
-    # pather='./amc/'+subject+'.json'
-    # with open(pather, "r+") as file:
-    #     data = json.load(file)
-    #     data.update(maj)
-    #     file.seek(0)
-    #     json.dump(data, file)
-    # with open(pather,'r') as collegee_data:
-    #     maj = json.load(collegee_data)
-    # j=your_data.copy()
-    # po=[]
-    # po.append(j)
-    # maj[0]["vid"][]=po
-    # j_obj=open(pather,"w")
-    # json.dump(maj,j_obj)
-    # j_obj.close()
 
 
 
@@ -135,27 +121,31 @@ manager= multiprocessing.Manager()
 def june_bug(name_tag):
     work_data={}
     
+    
     majors=[]
     pathe='./amc/'+name_tag+'.json'
     with open(pathe,'r') as college_data:
       majors = json.load(college_data)
-    for i in range(len(majors)):
-        data_json=openJson(majors[i])
-        your_data=manager.dict()
-        if(data_json!=[]):
-            work_data=data_json[0]
-            if(len(data_json)>1):
-                work_data=data_json[1]
-            item=((majors[i],s,0,work_data["topics"].index(s))for s in work_data["topics"])
-            # pool=mp.Pool(processes=8)
-            # pool.map(Get_youtube,item)
-            with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
-                future=executor.map(Get_youtube,item)
-
+    if(majors!=[]):
+        for i in range(len(majors)):
+            data_json=openJson(majors[i])
             
-           
-        print(majors[i]+"donezo")
-
+            your_data=manager.dict()
+            df = pd.DataFrame(columns=["degree","video_id","duration","views","age","title","img","topic","subject"])
+            df.to_csv('./pending/'+majors[i]+'.csv')
+            if(data_json!=[]):
+                work_data=data_json[0]
+                if(len(data_json)>1):
+                    work_data=data_json[1]
+                item=((majors[i],s,0,work_data["topics"].index(s))for s in work_data["topics"])
+                
+                with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+                    future=executor.map(Get_youtube,item,timeout=20)
+                with multiprocessing.get_context('spawn').Pool() as pool:
+                    pool.map(Get_youtube, item)
+            
+            
+  
 
 if __name__=="__main__":
     june_bug('start_here')
