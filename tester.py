@@ -1,6 +1,12 @@
-import pandas as pd
+import os 
+import json
 
-df=pd.DataFrame(columns=["degree","video_id"])
-jo={"degree":"c","video_id":"j"}
-df=df.append(jo,ignore_index=True)
-df.to_csv('./pending/ss.csv', mode='a', header=False,index=False)
+def openJson(name_tag):
+    print(os.getcwd())
+    
+    pathe='./ad_sub/'+name_tag+'.json'
+    with open(pathe,'r') as college_data:
+      majors = json.load(college_data)
+      print (majors)
+
+openJson('Aerospace Engineering (Course 16)')

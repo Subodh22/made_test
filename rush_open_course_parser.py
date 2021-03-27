@@ -2,18 +2,23 @@ import os
 import json
 import unicodedata
 import multiprocessing
+from multiprocessing import freeze_support
 import concurrent.futures
 import re
+from neo4j import GraphDatabase
 from selenium import webdriver 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from tqdm import tqdm
+
+graphe=GraphDatabase.driver("bolt://localhost/:7687",auth=("neo4j","mathers22"))
 def mr_service(gene):
     pathe='./amc/'+gene+'.json'
     with open(pathe,'r') as college_data:
       majors = json.load(college_data)
+    
     
 
 def openJson(name_tag):
@@ -28,8 +33,16 @@ def writeToJson(fileName,data):
     with open(filePath,'w') as fp:
         json.dump(data,fp)
 subject_data_calendars=[]
-aftermath_calender=[]
-def search_jobs(search_subject):
+def topic_to_db(courseU,topic_name,deg):
+    course_name='"'+courseU+'"'
+    topic='"'+topic_name+'"'
+    degree_id='"'+deg+'"'
+    sess=graphe.session()
+    query="MATCH(x:CourseUnit{name:"+course_name+"}) CREATE(y:topic{name:"+topic+",deg:"+degree_id+"}),(x)-[:Topics_for]->(y)"
+    sess.run(query)
+    sess.close()
+
+def search_jobs(search_subject,deg):
     data={}
     topic_list=[]
     youtube_data=[]
@@ -46,7 +59,7 @@ def search_jobs(search_subject):
     options.add_argument('--disable-gpu')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
+    driver = webdriver.Chrome(executable_path="../chromedriver", options=options)
     url="https://ocw.mit.edu/search/ocwsearch.htm?q="+search_subject
     driver.get(url)
     try:
@@ -94,6 +107,7 @@ def search_jobs(search_subject):
                    
                     td_topic=td_object[num_id].get_attribute("innerText")
                     topic_list.append(td_topic)
+                    topic_to_db(search_subject,td_topic,deg)
                     
                 except:
                     continue
@@ -142,6 +156,8 @@ def search_jobs(search_subject):
                     
                         td_topic=td_object[num_id].get_attribute("innerText")
                         topic_list.append(td_topic)
+                        topic_to_db(search_subject,td_topic,deg)
+
                         
                        
                     except:
@@ -165,90 +181,15 @@ def search_jobs(search_subject):
     finally:
        driver.quit()
 
-def Get_youtube(lister):
-    topic=lister[1]
-    subject=lister[0]
-    youtube_data=[]
-    options = webdriver.ChromeOptions()
-    options.headless = True
-   
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--allow-running-insecure-content')
-    options.add_argument("--disable-extensions")
-    options.add_argument("--proxy-server='direct://'")
-    options.add_argument("--proxy-bypass-list=*")
-    options.add_argument("--start-maximized")
-    options.add_argument('--disable-gpu')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
-    urle="https://www.youtube.com/results?search_query="+topic+"in="+subject
-    driver.get(urle)
-    youtube_data=lister[2]
-    rank=lister[3]
-    u_data=[]
-   
-    try:
-        elemente =WebDriverWait(driver,10).until(
-        EC.presence_of_all_elements_located((By.ID,"dismissible"))
-        ) 
-      
-        driver.execute_script("window.scrollTo(0, 800)") 
-        
-        driver.execute_script("window.scrollTo(0, 1980)") 
-       
-        for i in range(15):
-            
-            vid_det={}
-            vid_det["degree"]=lister[3]
-            vid_det["video_id"]=re.findall(r"watch\?v=(\S{11})",(elemente[i].find_element_by_id("thumbnail").get_attribute("href")))
 
-
-            toni = elemente[i].find_element_by_tag_name("yt-formatted-string").get_attribute("aria-label")
-           
-            result = re.search('ago(.*)views', toni)
-            
-            
-            ioi=" ".join((result.group(1)).split(" ")[:-2])
-            
-
-
-            
-            tolir=elemente[i].find_element_by_id("metadata-line")
-          
-            
-    
-            toli=tolir.find_elements_by_tag_name("span")
-            
-            
-            vid_det["duration"]=ioi
-            vid_det["views"]=toli[0].get_attribute("innerHTML")
-            vid_det["age"]=toli[1].get_attribute("innerHTML")
-          
-            vid_det["title"]=elemente[i].find_element_by_tag_name("yt-formatted-string").get_attribute("innerHTML")
-           
-            vid_det["img"]=elemente[i].find_element_by_id("img").get_attribute("src")
-            
-            vid_det["topic"]=topic
-
-            u_data.append(vid_det)
-            print("bruno")
-        
-    
-
-           
-            
-    except:
-        print("not_work")
-
-    youtube_data[topic]=u_data
-    
 
 def dentist(jon):
-   
+  
+    sess=graphe.session()
     jondoe=jon[0]
     toni=jon[1]
+    degrees_name=jon[2]
+    deg=jon[3]
     if(jondoe.split(' ',1)[0]=="or"):
         jondoe=jondoe.split(' ',1)[1]
     acutal_course_code=jondoe.split(" ")
@@ -256,47 +197,68 @@ def dentist(jon):
     period_course=acutal_course_code[0]+" "+acutal_course_code[1]
     
     contains_digit = any(map(str.isdigit, period_course))
-    
+    d=degrees_name
+    course_unit='"'+jondoe+'"'
 
     if contains_digit == True:
         # print(value_for_extract[0][j])
         try:
             mr_service(jondoe)
+            query="MATCH(x:Degree{name:"+d+"}) MERGE(y:CourseUnit{name:"+course_unit+"}) CREATE(x)-[:courses]->(y)"
+            sess.run(query)
+            sess.close()
 
         except:
-          
+            query="MATCH(x:Degree{name:"+d+"}) CREATE(y:CourseUnit{name:"+course_unit+"}),(x)-[:courses]->(y)"
+            sess.run(query)
+            sess.close()
+        
             toni.append(jondoe)
-            search_jobs(jondoe)
+            search_jobs(jondoe,deg)
             writeToJson(jondoe,subject_data_calendars)
-            # subject_data_calendars=[]
+           
 
-            
-
-manager= multiprocessing.Manager()
-return_dict= manager.list()    
-
-
+           
 
 def jobs(groupe):
    
     sub_path='./ad_sub/'+groupe
-    
+    manager= multiprocessing.Manager()
+    return_dict= manager.list()    
+  
+
+  
     with open(sub_path,'r') as college_data:
         majors = json.load(college_data)
 
         for i in range(len(majors)):
             
             jon=list(majors[i].values())
+            degrees_name=sorted(majors[i].keys())
+            
+         
+            sess=graphe.session()
+            d='"'+degrees_name[0]+'"'
+            z='"'+str(jon[0])+'"'
+            query="CREATE (X:Degree{name:"+d+"}),(y:syllabus_graph{name:"+d+",values:"+z+"}),(X)-[:instructions]->(y)"
+
+            sess.run(query)
+            sess.close()
+            
             for x in range(len(jon[0])):
                 
                 value_for_extract=list(jon[0][x].values())
                 
                 # print(value_for_extract[0])
-                items=((l,return_dict)for l in value_for_extract[0])
-                with concurrent.futures.ProcessPoolExecutor() as executor:
-                  future=executor.map(dentist,items)
-                
-                
+                items=((l,return_dict,d,value_for_extract[0].index(l))for l in value_for_extract[0])
+
+              
+                with multiprocessing.get_context('spawn').Pool() as pool:
+                     pool.map(dentist, items)
+
+    jole=list(return_dict)
+    
+    writeToJson('start_here',jole)
    
            
          
@@ -305,45 +267,16 @@ def jobs(groupe):
   
         
     
-def june_bug():
-    work_data={}
-    for i in tqdm(range(len(return_dict))):
-        data_json=openJson(return_dict[i])
-        your_data=manager.dict()
-        if(data_json!=[]):
-            work_data=data_json[0]
-            if(len(data_json)>1):
-                work_data=data_json[1]
-            item=((return_dict[i],s,your_data,work_data["topics"].index(s))for s in work_data["topics"])
-            with concurrent.futures.ProcessPoolExecutor() as executor:
-                future=executor.map(Get_youtube,item)
 
-            maj={}
-            pather='./amc/'+return_dict[i]+'.json'
-            with open(pather,'r') as collegee_data:
-                maj = json.load(collegee_data)
-            j=your_data.copy()
-            po=[]
-            po.append(j)
-            maj[0]["vid"]=po
-            j_obj=open(pather,"w")
-            json.dump(maj,j_obj)
-            j_obj.close()
-            
 
-def starter():
-    # path, dirs, files = next(os.walk("./ad_sub/"))
-    # file_count = len(files)
-    
+def main():
+ 
    
-    jobs('Business Analytics (Course 15-​2).json')
+    jobs('Computer Science and Engineering (Course 6-​3).json')
   
-    jole=list(return_dict)
-    
-    writeToJson('start_here',jole)
+  
     
     # Get_youtube()
 
-
-
-starter()
+if __name__ == '__main__':
+    main()

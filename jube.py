@@ -14,7 +14,8 @@ import pandas as pd
 from multiprocessing import Pool
 from concurrent.futures import TimeoutError
 from multiprocessing import cpu_count
-
+from neo4j import GraphDatabase
+graphe=GraphDatabase.driver("bolt://localhost/:7687",auth=("neo4j","mathers22"))
 
 
 def Get_youtube(lister):
@@ -35,7 +36,7 @@ def Get_youtube(lister):
         options.add_argument('--disable-gpu')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--no-sandbox')
-        driver = webdriver.Chrome(executable_path="/home/subodh/Desktop/rasa/chromedriver", options=options)
+        driver = webdriver.Chrome(executable_path="../chromedriver", options=options)
         urle="https://www.youtube.com/results?search_query="+topic
         driver.get(urle)
         # youtube_data=lister[2]
@@ -88,15 +89,19 @@ def Get_youtube(lister):
             
             vid_det["topic"]=topic
             vid_det["subject"]=subject
-            # u_data.append(vid_det)
-            # vids=list(u_data.values())
-            # print(vid_det)
-            df2 = pd.DataFrame(columns=["degree","video_id","duration","views","age","title","img","topic","subject"])
-    
+           
+            # df2 = pd.DataFrame(columns=["degree","video_id","duration","views","age","title","img","topic","subject"])
+
             
-            df2=df2.append(vid_det,ignore_index=True)
-            df2.to_csv('./pending/'+subject+'.csv', mode='a', header=False)
+            # df2=df2.append(vid_det,ignore_index=True)
+            # df2.to_csv('./pending/'+subject+'.csv', mode='a', header=False)
+            sess=graphe.session()
+            query="UNWIND $mer_list as row MATCH(x:topic{name:row.topic}) CREATE(y:Videos{title:row.title,duration=row.duration,views=row.views,age=row.age,id=row.video_id,img=row.img}),(y)-[:videos_of]->(x)"
+            sess.run(query,mer_list=vid_det)
+            sess.close()
+
             print("okok")
+
        
         print(subject+"donezo")
         driver.quit()   
@@ -117,11 +122,11 @@ def openJson(name_tag):
     with open(pathe,'r') as college_data:
       majors = json.load(college_data)
       return majors
-manager= multiprocessing.Manager()
+
 def june_bug(name_tag):
     work_data={}
     
-    
+ 
     majors=[]
     pathe='./amc/'+name_tag+'.json'
     with open(pathe,'r') as college_data:
@@ -130,7 +135,7 @@ def june_bug(name_tag):
         for i in range(len(majors)):
             data_json=openJson(majors[i])
             
-            your_data=manager.dict()
+           
             df = pd.DataFrame(columns=["degree","video_id","duration","views","age","title","img","topic","subject"])
             df.to_csv('./pending/'+majors[i]+'.csv')
             if(data_json!=[]):
@@ -139,14 +144,16 @@ def june_bug(name_tag):
                     work_data=data_json[1]
                 item=((majors[i],s,0,work_data["topics"].index(s))for s in work_data["topics"])
                 
-                with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
-                    future=executor.map(Get_youtube,item,timeout=20)
-                with multiprocessing.get_context('spawn').Pool() as pool:
-                    pool.map(Get_youtube, item)
+                with concurrent.futures.ProcessPoolExecutor() as executor:
+                    executor.map(Get_youtube,item)
+                # with multiprocessing.get_context('spawn').Pool() as pool:
+                #     pool.map(Get_youtube, item)
             
             
   
 
 if __name__=="__main__":
     june_bug('start_here')
+    os.remove('./amc/start_here.json')
+
 
